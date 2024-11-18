@@ -40,9 +40,10 @@ while frontier:
     # check if url was already visited
     if url in visited:
         continue
-    # ensure that only .html, shtml and CPP only urls are added
-    if re.match(html_shtml, url) and re.match(cpp_full_address, url):
-        visited.append(url)
+
+    # mark current url as visited
+    # visited.add(url)
+    # frontier.append(url)
 
     # store page url and html on mongo db
     pages.insert_one({ 'url': url, 'html': data.decode('utf-8') })
@@ -56,7 +57,7 @@ while frontier:
         break
     else:
         pages.insert_one({ 'url': url, 'html': data.decode('utf-8') })
-        visited = []
+        linked_urls = []
 
         a_tag = bs.find_all('a', href=True)
 
@@ -66,22 +67,27 @@ while frontier:
 
             if re.match(r'^.*\/$', url):
                     url = url[:-1]
-            # Convert relative addresses to full addresses
+
+            # add base address to relative address
             if re.match(relative_url, url):
-                # Remove leading / if relative url starts with it
+                # clean / in beginning of relative url
                 if re.match(r'^\/', url):
                         url = url[1:]
 
-                # Remove leading ~ if relative url starts with it
+                # clean urls that start with ~
                 if re.match(r'^~', url):
                     url = url[1:]
 
                 url = cpp_base + url
                 
-            # Filter for .html or shtml files and CPP only urls
+            # ensure that links are html, shtml or cpp only
             if re.match(html_shtml, url) and re.match(cpp_full_address, url):
-                # Store each url in our linkedUrls array if not already in it
-                if url not in visited:
-                    visited.append(url)
-        frontier.append(url)
+                # append url to visited array
+                if url not in linked_urls:
+                     linked_urls.append(url)
+
+        for url in linked_urls:
+            if url not in visited:
+                visited.add(url)
+                frontier.append(url)
 
