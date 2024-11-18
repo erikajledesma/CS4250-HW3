@@ -38,10 +38,27 @@ for prof in clearfix:
     h2_tag = prof.find('h2')
     prof_name = h2_tag.get_text(strip=True) if h2_tag else "No Name Found"
 
+    # extract and parse <p> tag content
     p_tag = prof.find('p')
-    p_content = p_tag.get_text(separator=' ', strip=True) if p_tag else "No Details Found"
+    
+    # extract fields
 
-    print(f"Professor: {prof_name}, P Content: {p_content}")
+    if p_tag:
+        details = {}
+        for strong_tag in p_tag.find_all('strong'):
+            key = strong_tag.get_text(strip=True).strip(':')
+            value = strong_tag.next_sibling.strip() if strong_tag.next_sibling else ""
+
+        # Handle special cases like <a> tags for email and web
+            if strong_tag.find_next('a'):
+                value = strong_tag.find_next('a').get('href', value)
+            details[key] = value
+    else:
+        details = {}
+        
+    # insert document into mongodb
+
+    professors.insert_one({'name': prof_name, 'details': details})
 
 
 
