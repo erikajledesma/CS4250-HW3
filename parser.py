@@ -1,8 +1,5 @@
-import re
-from urllib.request import urlopen
 from pymongo import MongoClient
 from bs4 import BeautifulSoup
-from collections import deque
 
 # creating database connection object using pymongo
 
@@ -64,6 +61,3 @@ for prof in clearfix:
     # insert document into mongodb
 
     professors.insert_one({'name': prof_name, 'details': details})
-
-
-
