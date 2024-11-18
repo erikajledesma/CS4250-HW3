@@ -35,25 +35,18 @@ while frontier:
     html = urlopen(url)
     data = html.read()
     
-    bs = BeautifulSoup(html, 'html.parser')
+    bs = BeautifulSoup(data, 'html.parser')
 
     # check if url was already visited
-    if url in visited:
-        continue
-
-    # mark current url as visited
-    # visited.add(url)
-    # frontier.append(url)
-
-    # store page url and html on mongo db
-    pages.insert_one({ 'url': url, 'html': data.decode('utf-8') })
+    # if url in visited:
+    #     continue
 
     # check if target is found
     target = bs.find('h1', {'class': 'cpp-h1'}, string='Permanent Faculty')
     if target:
         pages.insert_one({ 'url': url, 'html': data.decode('utf-8'), 'isTarget': True })
         # clear frontier
-        frontier = deque()
+        # frontier = deque()
         break
     else:
         pages.insert_one({ 'url': url, 'html': data.decode('utf-8') })
