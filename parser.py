@@ -28,12 +28,8 @@ bs = BeautifulSoup(target_content, 'html.parser')
 # Use div tag clearfix to find each professor on the page
 
 clearfix = bs.find('div', { 'id': 'main'}).find_all('div', { 'class': 'clearfix'})
-# print(clearfix)
 
-# Regular expression to extract content inside the <p> tags
-# p_tag_pattern = r'<p>(.*?)</p>'
-
-# Iterate through each professor's HTML
+# iterate through each professor's HTML
 for prof in clearfix:
     h2_tag = prof.find('h2')
     prof_name = h2_tag.get_text(strip=True) if h2_tag else "No Name Found"
@@ -47,11 +43,20 @@ for prof in clearfix:
         details = {}
         for strong_tag in p_tag.find_all('strong'):
             key = strong_tag.get_text(strip=True).strip(':')
-            value = strong_tag.next_sibling.strip() if strong_tag.next_sibling else ""
+            value = strong_tag.next_sibling
 
-        # Handle special cases like <a> tags for email and web
-            if strong_tag.find_next('a'):
-                value = strong_tag.find_next('a').get('href', value)
+            if value and isinstance(value, str):
+                value = value.strip()
+            else:
+                value = ""
+
+            # handle <a> tags for email and web
+            if key == "Email" and strong_tag.find_next('a'):
+                email_link = strong_tag.find_next('a')
+                value = email_link['href']
+            elif key == "Web" and strong_tag.find_next('a'):
+                web_link = strong_tag.find_next('a')
+                value = web_link['href']
             details[key] = value
     else:
         details = {}
