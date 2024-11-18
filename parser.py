@@ -17,3 +17,13 @@ try:
     professors = db['professors']
 except:
     print("Database not connected successfully")
+
+# find the target document in the pages collection
+target = pages.find_one({'isTarget': True})
+target_content = target['html']
+
+# use BeautifulSoup to parse through html of target page
+bs = BeautifulSoup(target_content, 'html.parser')
+
+
+
